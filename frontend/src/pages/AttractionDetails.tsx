@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { featuredAttractions } from "@/components/FeaturedSection";
 import { Calendar } from "lucide-react";
@@ -12,20 +12,36 @@ import Footer from "@/components/Footer";
 const AttractionDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState("");
   const [numTickets, setNumTickets] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const attraction = featuredAttractions.find(a => a.id === id);
+
+  // Effect to refresh the component when location changes
+  useEffect(() => {
+    // Update the refresh key to force a re-render
+    setRefreshKey(prevKey => prevKey + 1);
+
+    // Reset state when navigating to a new attraction
+    setSelectedDate("");
+    setNumTickets(1);
+    setDialogOpen(false);
+  }, [location.pathname]);
 
   if (!attraction) {
     return <div>Attraction not found</div>;
   }
 
+  // Helper function to ensure number is not below 1
+  const ensurePositiveNumber = (value: number) => Math.max(1, value);
+
   const handleBookingClick = () => {
     const userDataStr = localStorage.getItem("user");
-    
+
     if (!userDataStr) {
       // If user is not logged in, redirect to login
       navigate('/login', { 
@@ -36,17 +52,14 @@ const AttractionDetails = () => {
       });
       return;
     }
-    
+
     // If logged in, open booking dialog
     setDialogOpen(true);
   };
 
-  // Helper function to ensure number is not below 1
-  const ensurePositiveNumber = (value: number) => Math.max(1, value);
-
   const handleBooking = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const userDataStr = localStorage.getItem("user");
     if (!userDataStr) {
       toast({
@@ -61,10 +74,10 @@ const AttractionDetails = () => {
       });
       return;
     }
-    
+
     // Ensure tickets value is at least 1
     const safeNumTickets = ensurePositiveNumber(numTickets);
-    
+
     // Generate a unique ID for the booking
     const bookingId = Date.now().toString();
     const newBooking = {
@@ -73,20 +86,20 @@ const AttractionDetails = () => {
       date: selectedDate,
       numTickets: safeNumTickets
     };
-    
+
     // Save to localStorage
     const existingBookingsStr = localStorage.getItem("bookings");
     const existingBookings = existingBookingsStr ? JSON.parse(existingBookingsStr) : [];
     const updatedBookings = [...existingBookings, newBooking];
     localStorage.setItem("bookings", JSON.stringify(updatedBookings));
-    
+
     toast({
       title: "Booking Confirmed!",
       description: `You've booked ${safeNumTickets} ticket(s) for ${attraction.title} on ${selectedDate}`,
     });
-    
+
     setDialogOpen(false);
-    
+
     // Ask if they want to view their bookings
     setTimeout(() => {
       toast({
@@ -102,7 +115,7 @@ const AttractionDetails = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" key={refreshKey}>
       <Navbar />
       
       <main className="flex-grow container mx-auto px-4 py-16">
@@ -138,11 +151,9 @@ const AttractionDetails = () => {
               </div>
 
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="w-full" onClick={handleBookingClick}>
-                    Book This Experience
-                  </Button>
-                </DialogTrigger>
+                <Button className="w-full" onClick={handleBookingClick}>
+                  Book This Experience
+                </Button>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Book {attraction.title}</DialogTitle>
