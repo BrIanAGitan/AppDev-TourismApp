@@ -9,7 +9,10 @@ import Signup from "./pages/Signup";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import AttractionsActivities from "./pages/AttractionsActivities";
-import Profile from "./pages/Profile"; // Added Profile component
+import Profile from "./pages/Profile";
+import AttractionDetails from "./pages/AttractionDetails";
+import About from "./pages/About";
+import ForgotPassword from "./pages/ForgotPassword";
 
 const queryClient = new QueryClient();
 
@@ -25,8 +28,10 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/attractions-activities" element={<AttractionsActivities />} />
-          <Route path="/profile" element={<Profile />} /> {/* Added Profile route */}
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/attraction/:id" element={<AttractionDetails />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

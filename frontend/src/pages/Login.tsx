@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,11 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if there's a redirect target in the state
+  const from = location.state?.from || "/profile";
+  const redirectReason = location.state?.message || "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +64,7 @@ const Login = () => {
       });
 
       // Redirect to profile page
-      navigate("/profile");
+      navigate(from);
     } catch (error) {
       toast({
         title: "Login failed",
@@ -88,6 +93,11 @@ const Login = () => {
             <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
             <CardDescription className="text-center">
               Sign in to your account to continue
+              {redirectReason && (
+                <div className="mt-2 text-sm p-2 bg-amber-50 text-amber-800 rounded-md">
+                  {redirectReason}
+                </div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>

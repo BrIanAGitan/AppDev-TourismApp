@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -11,15 +10,15 @@ const Hero = () => {
             Discover the Beauty of 
             <span className="text-cdo-gold"> Cagayan de Oro</span>
           </h1>
-          <p className="text-lg md:text-xl opacity-90 mb-8 animate-fade-in" style={{animationDelay: "0.2s"}}>
+          <p className="text-lg md:text-xl opacity-90 mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             Explore the City of Golden Friendship with our comprehensive guide to the best attractions, activities, and accommodations.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{animationDelay: "0.4s"}}>
+          <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
             <Button asChild size="lg" className="bg-cdo-gold text-black hover:bg-cdo-gold/90">
               <Link to="/attractions-activities">Explore Attractions & Activities</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
-              <Link to="/hotels">Find Accommodations</Link>
+              <Link to="/attractions-activities#accommodations">Find Accommodations</Link>
             </Button>
           </div>
         </div>

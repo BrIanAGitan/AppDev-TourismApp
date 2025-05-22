@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import FeaturedSection from "@/components/FeaturedSection";
@@ -32,12 +33,25 @@ const categories = [
 ];
 
 const Index = () => {
+  const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string } | null>(null);
+
+  useEffect(() => {
+    const userDataStr = localStorage.getItem("user");
+    if (userDataStr) {
+      try {
+        const userData = JSON.parse(userDataStr);
+        setUser(userData);
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Navbar />
       
       <main className="pt-16">
-        {/* Hero Section */}
         <Hero />
 
         {/* Categories Section */}
@@ -57,7 +71,7 @@ const Index = () => {
                   <h3 className="text-xl font-bold mb-2">{category.title}</h3>
                   <p className="text-gray-600 mb-4">{category.description}</p>
                   <Button asChild variant="outline" className="mt-auto">
-                    <Link to={`/category/${category.id}`}>Explore {category.title}</Link>
+                    <Link to={`/attractions-activities#${category.id}`}>Explore {category.title}</Link>
                   </Button>
                 </div>
               ))}
@@ -65,7 +79,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Featured Attractions */}
         <FeaturedSection />
 
         {/* About CDO Section */}
@@ -98,23 +111,25 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Call to Action */}
-        <section className="py-16 bg-cdo-blue text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to Explore Cagayan de Oro?</h2>
-            <p className="text-xl mb-8 max-w-3xl mx-auto">
-              Create an account to save your favorite spots, get personalized recommendations, and plan your perfect CDO adventure!
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" className="bg-cdo-gold text-black hover:bg-cdo-gold/90">
-                <Link to="/signup">Create an Account</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white hover:bg-white/10">
-                <Link to="/attractions-activities">Start Exploring</Link>
-              </Button>
+        {/* Call to Action - Only show when user is not logged in */}
+        {!user && (
+          <section className="py-16 bg-cdo-blue text-white">
+            <div className="container mx-auto px-4 text-center">
+              <h2 className="text-3xl font-bold mb-6">Ready to Explore Cagayan de Oro?</h2>
+              <p className="text-xl mb-8 max-w-3xl mx-auto">
+                Create an account to save your favorite spots, get personalized recommendations, and plan your perfect CDO adventure!
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Button asChild size="lg" className="bg-cdo-gold text-black hover:bg-cdo-gold/90">
+                  <Link to="/signup">Create an Account</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="bg-transparent border-white hover:bg-white/10">
+                  <Link to="/attractions-activities">Start Exploring</Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
       
       <Footer />
