@@ -5,6 +5,25 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view
+
+# Function-based registration view
+@api_view(['POST'])
+def register_user(request):
+    data = request.data
+    if not data.get('name') or not data.get('email') or not data.get('password'):
+        return Response({'detail': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(email=data['email']).exists():
+        return Response({'detail': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = User.objects.create(
+        username=data['email'],
+        email=data['email'],
+        first_name=data['name'],
+        password=make_password(data['password']),
+    )
+
+    return Response({'detail': 'User registered successfully'}, status=status.HTTP_201_CREATED)
 
 class CreateUserView(APIView):
     permission_classes = [AllowAny]
