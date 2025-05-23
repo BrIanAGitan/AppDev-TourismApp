@@ -42,7 +42,7 @@ const Login = () => {
       }
 
       // Replace this with actual API call
-      const response = await axios.post<LoginResponse>("http://localhost:8000/api/login/", {
+      const response = await axios.post<LoginResponse>(`${import.meta.env.VITE_API_URL}/api/login/`, {
         email,
         password,
       });
