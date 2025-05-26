@@ -1,11 +1,9 @@
-from django.contrib import admin
-from django.urls import path, include
-from api.views import CustomTokenObtainPairView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from django.urls import path
+from .views import register_user, LoginUserView, CustomTokenObtainPairView, BookingListCreateView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
+    path('register/', register_user, name='register'),
+    path('login/', LoginUserView.as_view(), name='login'),
     path('api/login/', CustomTokenObtainPairView.as_view(), name='custom_login'),
-    path('api/token/', TokenObtainPairView.as_view(), name='jwt_token_obtain_pair'),
+    path('bookings/', BookingListCreateView.as_view(), name='bookings'),
 ]
