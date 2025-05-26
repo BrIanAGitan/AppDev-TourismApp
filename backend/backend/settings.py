@@ -131,9 +131,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = [
-    "https://your-frontend-domain.onrender.com",  # if deployed
-    "http://localhost:3000",  # for local React dev
+CORS_ALLOWED_ORIGINS = [
+    "https://appdev-tourismapp.onrender.com",
+    "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

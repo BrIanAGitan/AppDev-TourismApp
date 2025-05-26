@@ -5,7 +5,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -18,9 +18,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [AllowAny]  # ✅ Allow public access
 
-# Function-based registration view
+# ✅ Function-based registration view with AllowAny permission
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def register_user(request):
     data = request.data
     if not data.get('name') or not data.get('email') or not data.get('password'):
