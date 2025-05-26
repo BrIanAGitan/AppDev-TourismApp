@@ -1,207 +1,157 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { featuredAttractions } from "@/components/FeaturedSection";
-import { Calendar } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { MapPin } from "lucide-react";
+import api from "@/services/api";
 
-const AttractionDetails = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+const Signup = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState("");
-  const [numTickets, setNumTickets] = useState(1);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const navigate = useNavigate();
 
-  const attraction = featuredAttractions.find(a => a.id === id);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  // Effect to refresh the component when location changes
-  useEffect(() => {
-    // Update the refresh key to force a re-render
-    setRefreshKey(prevKey => prevKey + 1);
-
-    // Reset state when navigating to a new attraction
-    setSelectedDate("");
-    setNumTickets(1);
-    setDialogOpen(false);
-  }, [location.pathname]);
-
-  if (!attraction) {
-    return <div>Attraction not found</div>;
-  }
-
-  // Helper function to ensure number is not below 1
-  const ensurePositiveNumber = (value: number) => Math.max(1, value);
-
-  const handleBookingClick = () => {
-    const userDataStr = localStorage.getItem("user");
-
-    if (!userDataStr) {
-      // If user is not logged in, redirect to login
-      navigate('/login', { 
-        state: { 
-          from: `/attraction/${id}`,
-          message: "Please log in or sign up to book this attraction."
-        }
+    if (!username || !email || !password || !confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
       });
+      setIsLoading(false);
       return;
     }
 
-    // If logged in, open booking dialog
-    setDialogOpen(true);
-  };
-
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = localStorage.getItem("access"); // Make sure you save JWT after login
-
-    if (!token) {
+    if (password !== confirmPassword) {
       toast({
-        title: "Login Required",
-        description: "Please login to book this attraction",
+        title: "Error",
+        description: "Passwords do not match.",
         variant: "destructive",
       });
-      navigate("/login", {
-        state: {
-          from: `/attraction/${id}`,
-          message: "Please log in or sign up to book this attraction.",
-        },
-      });
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          destination: attraction.title, // Use .title as in your featuredAttractions
-          date: selectedDate,
-          guests: numTickets,
-        }),
+      await api.post("/api/register/", {
+        username,
+        email,
+        password,
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || "Failed to book.");
-      }
-
       toast({
-        title: "Booking Confirmed!",
-        description: `You've booked ${numTickets} ticket(s) for ${attraction.title} on ${selectedDate}`,
+        title: "Account created!",
+        description: "Your account has been created successfully.",
       });
 
-      setDialogOpen(false);
-
-      setTimeout(() => {
-        toast({
-          title: "View Your Bookings",
-          description: "Go to your profile to see all your bookings",
-          action: (
-            <Button variant="outline" onClick={() => navigate("/profile")}>
-              View Profile
-            </Button>
-          ),
-        });
-      }, 1000);
-    } catch (error: any) {
-      console.error("Booking error:", error);
+      navigate("/login");
+    } catch (err) {
       toast({
-        title: "Booking Failed",
-        description: error.message || "Could not complete booking.",
+        title: "Registration failed",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col" key={refreshKey}>
-      <Navbar />
-      
-      <main className="flex-grow container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="relative h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
-            <img
-              src={attraction.image}
-              alt={attraction.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute top-4 right-4 bg-black/70 text-white text-sm font-medium px-3 py-1 rounded-full">
-              {attraction.category}
-            </div>
-          </div>
-          
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{attraction.title}</h1>
-              <div className="flex items-center gap-2 text-gray-600 mb-4">
-                <Calendar className="h-5 w-5" />
-                <span>{attraction.location}</span>
-              </div>
-              <p className="text-lg text-gray-700">{attraction.description}</p>
-            </div>
-            
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xl font-semibold">Book Now</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-lg font-bold">⭐</span>
-                  <span>{attraction.rating.toFixed(1)}</span>
-                </div>
-              </div>
-
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <Button className="w-full" onClick={handleBookingClick}>
-                  Book This Experience
-                </Button>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Book {attraction.title}</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleBooking} className="space-y-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Date</label>
-                      <Input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Number of Tickets</label>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={numTickets}
-                        onChange={(e) => setNumTickets(ensurePositiveNumber(Number(e.target.value)))}
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full">
-                      Confirm Booking
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-flex items-center">
+            <MapPin className="h-6 w-6 text-cdo-blue" />
+            <span className="font-bold text-xl text-cdo-blue ml-2">
+              CDO<span className="text-cdo-gold">Guide</span>
+            </span>
+          </Link>
         </div>
-      </main>
-      
-      <Footer />
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Create an account</CardTitle>
+            <CardDescription className="text-center">
+              Sign up to get started with CDOGuide
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="johndoe"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Creating account..." : "Create account"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-gray-500">
+              Already have an account?{" "}
+              <Link to="/login" className="text-cdo-blue hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 };
 
-export default AttractionDetails;
+export default Signup;
