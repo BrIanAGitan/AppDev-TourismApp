@@ -4,20 +4,21 @@ from .models import Note, Booking
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    name = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ["id", "username", "email", "password"]
+        fields = ["id", "username", "name", "email", "password"]
         extra_kwargs = {
             "password": {"write_only": True},
-            "email": {"required": True},
+            "username": {"read_only": True},
         }
 
     def create(self, validated_data):
-        return User.objects.create_user(
-            username=validated_data["username"],
-            email=validated_data["email"],
-            password=validated_data["password"],
-        )
+        validated_data["username"] = validated_data.pop("name")  # map 'name' to 'username'
+        user = User.objects.create_user(**validated_data)
+        return user
 
 
 class NoteSerializer(serializers.ModelSerializer):
