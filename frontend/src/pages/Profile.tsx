@@ -136,37 +136,74 @@ const Profile = () => {
     });
   };
 
-  const handleSaveBookingEdit = () => {
+  const handleSaveBookingEdit = async () => {
     if (!editBookingId) return;
+    const token = localStorage.getItem("access");
 
-    // Ensure tickets value is at least 1
     const safeNumTickets = ensurePositiveNumber(editBookingForm.numTickets);
 
-    const updatedBookings = bookings.map(booking =>
-      booking.id === editBookingId
-        ? { ...booking, date: editBookingForm.date, numTickets: safeNumTickets }
-        : booking
-    );
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${editBookingId}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          date: editBookingForm.date,
+          guests: safeNumTickets, // Use 'guests' if that's your backend field
+        }),
+      });
 
-    setBookings(updatedBookings);
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
-    setEditBookingId(null);
+      if (!response.ok) throw new Error("Failed to update booking");
 
-    toast({
-      title: "Booking Updated",
-      description: "Your booking has been successfully updated.",
-    });
+      toast({
+        title: "Booking Updated",
+        description: "Your booking has been successfully updated.",
+      });
+
+      setEditBookingId(null);
+      fetchBookings(); // Refresh bookings from backend
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Could not update booking.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteBooking = (id: string) => {
-    const updatedBookings = bookings.filter(booking => booking.id !== id);
-    setBookings(updatedBookings);
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+  const handleDeleteBooking = async (id: string) => {
+    const token = localStorage.getItem("access");
 
-    toast({
-      title: "Booking Deleted",
-      description: "Your booking has been successfully deleted.",
-    });
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete booking");
+
+      toast({
+        title: "Booking Deleted",
+        description: "Your booking has been successfully deleted.",
+      });
+
+      fetchBookings(); // Refresh bookings
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Could not delete booking.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Helper function to find attraction details

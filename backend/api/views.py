@@ -27,7 +27,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 # Registration
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def register_user(request):
     required_fields = ['username', 'email', 'password']
     for field in required_fields:
@@ -75,10 +74,12 @@ class BookingListCreateView(generics.ListCreateAPIView):
 
 # Booking ViewSet for full CRUD
 class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        # Only return bookings for the authenticated user
         return Booking.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
