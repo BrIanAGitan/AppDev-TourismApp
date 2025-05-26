@@ -15,7 +15,6 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import os
 import dj_database_url
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
 
 load_dotenv()
