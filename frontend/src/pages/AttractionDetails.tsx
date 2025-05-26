@@ -57,61 +57,71 @@ const AttractionDetails = () => {
     setDialogOpen(true);
   };
 
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = localStorage.getItem("access"); // Make sure you save JWT after login
 
-    const userDataStr = localStorage.getItem("user");
-    if (!userDataStr) {
+    if (!token) {
       toast({
         title: "Login Required",
         description: "Please login to book this attraction",
+        variant: "destructive",
       });
-      navigate("/login", { 
-        state: { 
+      navigate("/login", {
+        state: {
           from: `/attraction/${id}`,
-          message: "Please log in or sign up to book this attraction."
-        }
+          message: "Please log in or sign up to book this attraction.",
+        },
       });
       return;
     }
 
-    // Ensure tickets value is at least 1
-    const safeNumTickets = ensurePositiveNumber(numTickets);
-
-    // Generate a unique ID for the booking
-    const bookingId = Date.now().toString();
-    const newBooking = {
-      id: bookingId,
-      attractionId: attraction.id,
-      date: selectedDate,
-      numTickets: safeNumTickets
-    };
-
-    // Save to localStorage
-    const existingBookingsStr = localStorage.getItem("bookings");
-    const existingBookings = existingBookingsStr ? JSON.parse(existingBookingsStr) : [];
-    const updatedBookings = [...existingBookings, newBooking];
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
-
-    toast({
-      title: "Booking Confirmed!",
-      description: `You've booked ${safeNumTickets} ticket(s) for ${attraction.title} on ${selectedDate}`,
-    });
-
-    setDialogOpen(false);
-
-    // Ask if they want to view their bookings
-    setTimeout(() => {
-      toast({
-        title: "View Your Bookings",
-        description: "Go to your profile to see all your bookings",
-        action: (
-          <Button variant="outline" onClick={() => navigate("/profile")}>
-            View Profile
-          </Button>
-        ),
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          destination: attraction.title, // Use .title as in your featuredAttractions
+          date: selectedDate,
+          guests: numTickets,
+        }),
       });
-    }, 1000);
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || "Failed to book.");
+      }
+
+      toast({
+        title: "Booking Confirmed!",
+        description: `You've booked ${numTickets} ticket(s) for ${attraction.title} on ${selectedDate}`,
+      });
+
+      setDialogOpen(false);
+
+      setTimeout(() => {
+        toast({
+          title: "View Your Bookings",
+          description: "Go to your profile to see all your bookings",
+          action: (
+            <Button variant="outline" onClick={() => navigate("/profile")}>
+              View Profile
+            </Button>
+          ),
+        });
+      }, 1000);
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      toast({
+        title: "Booking Failed",
+        description: error.message || "Could not complete booking.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
