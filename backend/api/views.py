@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.decorators import api_view, permission_classes
+from .serializers import UserSerializer
 
 from .models import Booking
 from .serializers import BookingSerializer
@@ -28,21 +29,16 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-    data = request.data
-    if not data.get('name') or not data.get('email') or not data.get('password'):
-        return Response({'detail': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    if User.objects.filter(email=data['email']).exists():
-        return Response({'detail': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
+    required_fields = ['username', 'email', 'password']
+    for field in required_fields:
+        if field not in request.data or not request.data[field]:
+            return Response({'detail': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = User.objects.create(
-        username=data['email'],
-        email=data['email'],
-        first_name=data['name'],
-        password=make_password(data['password']),
-    )
-
-    return Response({'detail': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Login
 class LoginUserView(APIView):
