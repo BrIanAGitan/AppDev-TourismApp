@@ -1,6 +1,10 @@
-// services/api.ts
+// src/services/api.ts
+import axios from "axios";
 
-const BASE_URL = "https://cagayan-de-oro-tour.onrender.com";
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  withCredentials: true,
+});
 
 export type LoginResponse = {
   access: string;
@@ -13,35 +17,19 @@ type LoginPayload = {
 };
 
 export const loginUser = async ({ email, password }: LoginPayload): Promise<LoginResponse> => {
-  const response = await fetch(`${BASE_URL}/api/login/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username: email, password }), // Django expects `username`
+  const response = await api.post<LoginResponse>("/api/login/", {
+    email,
+    password,
   });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || "Login failed");
-  }
-
-  return response.json();
+  return response.data;
 };
 
 export const registerUser = async (name: string, email: string, password: string): Promise<void> => {
-  const response = await fetch(`${BASE_URL}/api/register/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, email, password }),
+  await api.post("/api/register/", {
+    name,
+    email,
+    password,
   });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || "Registration failed");
-  }
 };
 
-export default loginUser;
+export default api;

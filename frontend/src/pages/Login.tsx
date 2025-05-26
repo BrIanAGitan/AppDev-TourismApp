@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
-import axios from "axios";
+import { loginUser } from "@/services/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -35,28 +35,18 @@ const Login = () => {
     }
 
     try {
-      // Define the expected response type
-      interface LoginResponse {
-        access: string;
-        refresh: string;
-      }
+      // Use the returned values directly
+      const { access, refresh } = await loginUser({ email, password });
 
-      // Replace this with actual API call
-      const response = await axios.post<LoginResponse>(`${import.meta.env.VITE_API_URL}/api/login/`, {
-        email,
-        password,
-      });
-
-      // Save user data to localStorage
       const userData = {
-        name: email.split("@")[0], // Extract name from email as placeholder
+        name: email.split("@")[0],
         email: email,
-        avatarUrl: "", // Placeholder for avatar
+        avatarUrl: "",
       };
 
       localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("access", response.data.access);
-      localStorage.setItem("refresh", response.data.refresh);
+      localStorage.setItem("access", access);
+      localStorage.setItem("refresh", refresh);
 
       toast({
         title: "Success!",

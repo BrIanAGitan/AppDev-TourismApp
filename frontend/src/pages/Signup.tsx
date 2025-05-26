@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
-import axios from "axios";
+import api from "@/services/api";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -45,7 +45,7 @@ const Signup = () => {
     }
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/register/`, {
+      await api.post("/api/register/", {
         name,
         email,
         password,
