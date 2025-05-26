@@ -77,7 +77,7 @@ const AttractionDetails = () => {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

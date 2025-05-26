@@ -77,7 +77,7 @@ const Profile = () => {
     const token = localStorage.getItem("access");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
