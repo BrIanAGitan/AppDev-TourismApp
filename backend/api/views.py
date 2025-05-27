@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions, viewsets
+from rest_framework.views import APIView  # ✅ Add this line
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
@@ -11,6 +12,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .serializers import UserSerializer
 from .models import Booking
 from .serializers import BookingSerializer
+
 
 # JWT customization
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
