@@ -73,7 +73,7 @@ const AttractionDetails = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/bookings/`,
+        `${import.meta.env.VITE_API_BASE_URL}/bookings/`,
         {
           method: "POST",
           headers: {
