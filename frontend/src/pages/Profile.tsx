@@ -66,16 +66,21 @@ const Profile = () => {
     }
   }, [navigate]);
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cagayan-de-oro-tour.onrender.com/api";
+
   const fetchBookings = async () => {
+    const token = localStorage.getItem("access");
+    if (!token) return;
+
     try {
-      const access = localStorage.getItem("access");
-      const response = await fetch("https://cagayan-de-oro-tour.onrender.com/api/bookings/", {
+      const response = await fetch(`${BASE_URL}/bookings/`, {
         headers: {
-          Authorization: `Bearer ${access}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) throw new Error("Failed to fetch bookings");
+
       const data = await response.json();
       setBookings(data);
     } catch (error) {

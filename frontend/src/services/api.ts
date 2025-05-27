@@ -120,24 +120,24 @@ export const updateBooking = async (
   return response.data;
 };
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cagayan-de-oro-tour.onrender.com/api";
+
 export const refreshAccessToken = async (): Promise<string | null> => {
   const refresh = localStorage.getItem("refresh");
   if (!refresh) return null;
 
-  try {
-    type RefreshResponse = { access: string };
-    const response = await axios.post<RefreshResponse>(
-      `${API_BASE_URL}/token/refresh/`,
-      { refresh }
-    );
-    const { access } = response.data;
-    localStorage.setItem("access", access);
-    return access;
-  } catch (err) {
-    localStorage.removeItem("access");
-    localStorage.removeItem("refresh");
-    return null;
+  const response = await fetch(`${BASE_URL}/token/refresh/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh }),
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    localStorage.setItem("access", data.access);
+    return data.access;
   }
+  return null;
 };
 
 export default api;

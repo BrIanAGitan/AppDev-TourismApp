@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
-import { loginUser } from "@/services/api";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -43,24 +42,33 @@ const Login = () => {
     }
 
     try {
-      const { access, refresh } = await loginUser({ username, password });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/token/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
 
-      // Save tokens before navigating
-      localStorage.setItem("access", access);
-      localStorage.setItem("refresh", refresh);
-
-      // Optionally set a timer for auto-logout
-      setTimeout(() => {
-        localStorage.clear();
-        navigate("/login");
-      }, 30 * 60 * 1000); // 30 mins
-
-      toast({
-        title: "Logged in!",
-        description: "Welcome back.",
-      });
-
-      navigate(from);
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("access", data.access);
+        localStorage.setItem("refresh", data.refresh);
+        toast({
+          title: "Logged in!",
+          description: "Welcome back.",
+        });
+        navigate(from);
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Invalid username or password. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Login failed",
