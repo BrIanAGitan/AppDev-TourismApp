@@ -322,7 +322,7 @@ const Profile = () => {
                       <CardDescription>Manage your attraction bookings</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {bookings.length > 0 ? (
+                      {Array.isArray(bookings) && bookings.length > 0 ? (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -402,11 +402,7 @@ const Profile = () => {
                           </TableBody>
                         </Table>
                       ) : (
-                        <div className="text-center py-8">
-                          <Calendar className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                          <h3 className="text-lg font-medium mb-1">No Bookings Yet</h3>
-                          <p className="text-gray-500">You haven't made any bookings yet.</p>
-                        </div>
+                        <p className="text-gray-500">No bookings found.</p>
                       )}
                     </CardContent>
                   </Card>
