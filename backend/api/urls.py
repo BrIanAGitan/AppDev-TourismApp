@@ -16,7 +16,6 @@ urlpatterns = [
     path('register/', register_user, name='register'),
     path('login/', LoginUserView.as_view(), name='login'),
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # existing refresh endpoint
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_api'),  # ✅ required!
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('', include(router.urls)),
 ]
