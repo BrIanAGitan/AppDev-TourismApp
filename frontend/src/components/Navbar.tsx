@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { logout } from "@/lib/logout";
 
 interface User {
   name: string;
@@ -42,20 +43,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-
-    // If on home page, refresh the page to show the "Ready to Explore" section
-    if (location.pathname === "/") {
-      window.location.reload();
-    } else {
-      navigate("/");
-    }
+    logout();
   };
 
   return (

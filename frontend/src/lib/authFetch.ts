@@ -1,71 +1,47 @@
-let isRefreshing = false;
-
-export async function authFetch(input: RequestInfo, init: RequestInit = {}): Promise<Response> {
+export const authFetch = async (url: string, options: RequestInit = {}) => {
   const access = localStorage.getItem("access");
   const refresh = localStorage.getItem("refresh");
 
-  if (!access || !refresh) {
-    redirectToLogin();
-    throw new Error("Missing access or refresh token");
-  }
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${access}`,
+    "Content-Type": "application/json",
+  };
 
-  // First attempt with current access token
-  let response = await fetch(input, {
-    ...init,
-    headers: {
-      ...(init.headers || {}),
-      Authorization: `Bearer ${access}`,
-    },
+  let response = await fetch(url, {
+    ...options,
+    headers,
   });
 
-  if (response.status !== 401) {
-    return response;
-  }
-
-  // Already tried refreshing, don't repeat
-  if (isRefreshing) {
-    return response;
-  }
-
-  isRefreshing = true;
-
-  try {
-    const refreshResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/token/refresh/`, {
+  // If unauthorized, try refresh
+  if (response.status === 401 && refresh) {
+    const refreshRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/token/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
     });
 
-    if (!refreshResponse.ok) {
-      redirectToLogin();
-      throw new Error("Refresh token expired");
-    }
+    if (refreshRes.ok) {
+      const data = await refreshRes.json();
+      localStorage.setItem("access", data.access);
 
-    const data = await refreshResponse.json();
-    localStorage.setItem("access", data.access);
-
-    // Retry original request with new token
-    response = await fetch(input, {
-      ...init,
-      headers: {
-        ...(init.headers || {}),
+      // Retry original request with new token
+      const retryHeaders = {
+        ...headers,
         Authorization: `Bearer ${data.access}`,
-      },
-    });
+      };
 
-    return response;
-  } catch (err) {
-    console.error("Token refresh failed:", err);
-    redirectToLogin();
-    throw err;
-  } finally {
-    isRefreshing = false;
+      response = await fetch(url, {
+        ...options,
+        headers: retryHeaders,
+      });
+    } else {
+      // Refresh failed, force logout
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      window.location.href = "/login";
+    }
   }
-}
 
-function redirectToLogin() {
-  localStorage.removeItem("access");
-  localStorage.removeItem("refresh");
-  localStorage.removeItem("user");
-  window.location.href = "/login";
-}
+  return response;
+};

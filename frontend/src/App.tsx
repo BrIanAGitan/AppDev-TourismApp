@@ -19,6 +19,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 
 // Components
 import PrivateRoute from "./components/PrivateRoute";
+import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <Navbar /> {/* Global Navbar */}
         <Routes>
           <Route
             path="/"

@@ -3,7 +3,14 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
 
@@ -15,15 +22,13 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redirect if already logged in
   useEffect(() => {
-    const token = localStorage.getItem("access");
-    if (token) {
+    const access = localStorage.getItem("access");
+    if (access) {
       navigate("/profile");
     }
   }, []);
 
-  // Check if there's a redirect target in the state
   const from = location.state?.from || "/profile";
   const redirectReason = location.state?.message || "";
 
@@ -42,28 +47,22 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/token/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/token/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-      if (!response.ok) {
-        throw new Error("Invalid credentials");
-      }
+      if (!response.ok) throw new Error("Invalid credentials");
 
       const data = await response.json();
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
 
-      // redirect AFTER tokens are set
-      navigate("/profile");
-    } catch (error) {
+      navigate(from);
+    } catch {
       toast({
         title: "Login failed",
         description: "Invalid username or password. Please try again.",
@@ -85,7 +84,6 @@ const Login = () => {
             </span>
           </Link>
         </div>
-
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
@@ -106,9 +104,9 @@ const Login = () => {
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Enter your username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
                   />
                 </div>
                 <div className="space-y-2">
@@ -121,9 +119,9 @@ const Login = () => {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
@@ -134,7 +132,7 @@ const Login = () => {
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-gray-500">
-              Don't have an account?{" "}
+              Don’t have an account?{" "}
               <Link to="/signup" className="text-cdo-blue hover:underline">
                 Sign up
               </Link>

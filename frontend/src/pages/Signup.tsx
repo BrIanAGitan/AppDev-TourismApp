@@ -31,39 +31,39 @@ const Signup = () => {
     setIsLoading(true);
     setError(null);
 
-    // Basic validation
     if (!name || !username || !email || !password || !confirmPassword) {
+      toast({ title: "Error", description: "Please fill in all fields.", variant: "destructive" });
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      });
       return;
     }
 
     if (password !== confirmPassword) {
+      toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
       setIsLoading(false);
-      toast({
-        title: "Error",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      });
       return;
     }
 
     try {
-      // Call your backend registration API
       await registerUser(username, email, password);
 
-      toast({
-        title: "Account created!",
-        description: "Your account has been created successfully.",
+      // Auto-login right after registration
+      const loginRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/token/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
 
-      navigate("/login");
-    } catch (error) {
-      setError("Error creating account.");
+      if (!loginRes.ok) throw new Error("Auto-login failed");
+
+      const tokens = await loginRes.json();
+      localStorage.setItem("access", tokens.access);
+      localStorage.setItem("refresh", tokens.refresh);
+
+      toast({ title: "Welcome!", description: "Your account has been created." });
+
+      navigate("/profile");
+    } catch (err) {
+      console.error(err);
       toast({
         title: "Registration failed",
         description: "Something went wrong. Please try again.",
