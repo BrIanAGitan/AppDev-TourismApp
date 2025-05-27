@@ -35,7 +35,7 @@ const Login = () => {
     }
 
     try {
-      const { access, refresh } = await loginUser({ email, password });
+     const { access, refresh } = await loginUser({ email, password });
 
       // Save tokens before navigating
       localStorage.setItem("access", access);

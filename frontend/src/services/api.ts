@@ -49,22 +49,22 @@ api.interceptors.response.use(
   }
 );
 
-export type LoginResponse = {
-  access: string;
-  refresh: string;
-};
-
 type LoginPayload = {
   email: string;
   password: string;
+};
+
+export type LoginResponse = {
+  access: string;
+  refresh: string;
 };
 
 export const loginUser = async ({
   email,
   password,
 }: LoginPayload): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>("/api/login/", {
-    email,
+  const response = await api.post<LoginResponse>("/login/", {
+    username: email,
     password,
   });
 
