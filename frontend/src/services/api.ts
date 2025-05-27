@@ -81,19 +81,18 @@ export const registerUser = async (
   email: string,
   password: string
 ): Promise<void> => {
-  // ✅ Correct field: `username`
-  await axios.post(
-    `${API_BASE_URL}/register/`,
+  await api.post(
+    "/register/",
     {
-      username: name,
+      username: name, // Django expects 'username'
       email,
       password,
     },
     {
-      withCredentials: true,
       headers: {
-        Authorization: "", // ✅ Do not send token for registration
+        Authorization: "", // No token needed for registration
       },
+      withCredentials: true,
     }
   );
 };
