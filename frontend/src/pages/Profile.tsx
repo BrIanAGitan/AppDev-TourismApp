@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,9 +46,31 @@ const Profile = () => {
     date: "",
     numTickets: 1,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const ensurePositiveNumber = (value: number) => Math.max(1, value);
+
+  // 🛠 Step 1: Memoized fetchBookings
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch bookings");
+      }
+      const data = await res.json();
+      setBookings(data);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+      setError("Could not load bookings");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -67,22 +89,17 @@ const Profile = () => {
     }
   }, [navigate]);
 
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cagayan-de-oro-tour.onrender.com/api";
-
-  const fetchBookings = async () => {
-    try {
-      const response = await authFetch(`${BASE_URL}/bookings/`);
-      if (!response.ok) throw new Error("Failed to fetch bookings");
-      const data = await response.json();
-      setBookings(data);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
+  useEffect(() => {
+    const access = localStorage.getItem("access");
+    if (!access) {
+      navigate("/login");
     }
-  };
+  }, [navigate]);
 
+  // 🛠 Step 3: Initial Load with useEffect
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [fetchBookings]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -121,7 +138,7 @@ const Profile = () => {
   const handleSaveBookingEdit = async () => {
     if (editingId === null) return;
     try {
-      const response = await authFetch(`${BASE_URL}/bookings/${editingId}/`, {
+      const response = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/${editingId}/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editBookingForm),
@@ -139,7 +156,7 @@ const Profile = () => {
 
   const handleDeleteBooking = async (id: number) => {
     try {
-      const response = await authFetch(`${BASE_URL}/bookings/${id}/`, {
+      const response = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/${id}/`, {
         method: "DELETE",
       });
 

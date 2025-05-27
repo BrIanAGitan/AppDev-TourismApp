@@ -53,22 +53,16 @@ const Login = () => {
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("access", data.access);
-        localStorage.setItem("refresh", data.refresh);
-        toast({
-          title: "Logged in!",
-          description: "Welcome back.",
-        });
-        navigate(from);
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid username or password. Please try again.",
-          variant: "destructive",
-        });
+      if (!response.ok) {
+        throw new Error("Invalid credentials");
       }
+
+      const data = await response.json();
+      localStorage.setItem("access", data.access);
+      localStorage.setItem("refresh", data.refresh);
+
+      // redirect AFTER tokens are set
+      navigate("/profile");
     } catch (error) {
       toast({
         title: "Login failed",
