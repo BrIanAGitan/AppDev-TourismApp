@@ -11,7 +11,7 @@ interface UserContextType {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {

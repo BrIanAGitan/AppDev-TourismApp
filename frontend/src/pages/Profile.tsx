@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Calendar, Edit, Trash } from "lucide-react";
 import { featuredAttractions } from "@/components/FeaturedSection";
 import { authFetch } from "@/lib/authFetch";
-import { useUser } from "@/context/UserContext";
+import { UserContext } from "@/context/UserContext";
 
 interface User {
   username: string;
@@ -36,7 +36,7 @@ type Booking = {
 };
 
 const Profile = () => {
-  const { user, setUser } = useUser();
+  const { user, setUser } = useContext(UserContext);
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<UserProfile>({
@@ -59,7 +59,7 @@ const Profile = () => {
 
   const ensurePositiveNumber = (value: number) => Math.max(1, value);
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = async () => {
     setLoading(true);
     setError(null);
 
@@ -76,7 +76,7 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -104,7 +104,7 @@ const Profile = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, [fetchBookings]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
