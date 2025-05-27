@@ -6,6 +6,7 @@ from .views import (
     LoginUserView,
     CustomLoginView,
     BookingViewSet,
+    BookingListCreateView,  # <-- Import your view
 )
 
 router = DefaultRouter()
@@ -16,5 +17,6 @@ urlpatterns = [
     path('login/', LoginUserView.as_view(), name='login'),  # optional, legacy
     path('token/', CustomLoginView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('bookings/', BookingListCreateView.as_view(), name='booking-list-create'),  # <-- Add this line
     path('', include(router.urls)),
 ]
