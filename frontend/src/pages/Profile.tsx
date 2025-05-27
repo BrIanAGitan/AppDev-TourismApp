@@ -48,10 +48,9 @@ interface UserProfile extends User {
 
 type Booking = {
   id: number;
-  attractionId: string;
+  destination: string;
   date: string;
-  numTickets: number;
-  created_at?: string;
+  guests: number;
 };
 
 const Profile = () => {
@@ -70,34 +69,13 @@ const Profile = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editBookingForm, setEditBookingForm] = useState({
     date: "",
-    numTickets: 1,
+    guests: 1,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const ensurePositiveNumber = (value: number) => Math.max(1, value);
-
-  const fetchBookings = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await authFetch(
-        `${import.meta.env.VITE_API_BASE_URL}/bookings/`
-      );
-      if (!res.ok) {
-        throw new Error("Failed to fetch bookings");
-      }
-      const data = await res.json();
-      setBookings(data);
-    } catch (err) {
-      console.error("Error fetching bookings:", err);
-      setError("Could not load bookings");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -124,8 +102,36 @@ const Profile = () => {
   }, [navigate]);
 
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const fetchBookings = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const response = await fetch(
+          "https://cagayan-de-oro-tour.onrender.com/api/bookings/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setBookings(data);
+        } else {
+          console.error("Failed to fetch bookings");
+        }
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
+    };
+
     fetchBookings();
-  }, []);
+  }, [user, navigate]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -164,7 +170,7 @@ const Profile = () => {
     setEditingId(booking.id);
     setEditBookingForm({
       date: booking.date,
-      numTickets: booking.numTickets,
+      guests: booking.guests,
     });
   };
 
@@ -184,7 +190,11 @@ const Profile = () => {
 
       toast({ title: "Booking updated!" });
       setEditingId(null);
-      fetchBookings();
+      // re-fetch bookings after update
+      const refreshed = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/`);
+      if (refreshed.ok) {
+        setBookings(await refreshed.json());
+      }
     } catch (error) {
       console.error("Error updating booking:", error);
     }
@@ -366,87 +376,35 @@ const Profile = () => {
                       <CardDescription>Manage your attraction bookings</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {Array.isArray(bookings) && bookings.length > 0 ? (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Attraction</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Tickets</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {bookings.map((booking) => {
-                              const attraction = getAttractionDetails(booking.attractionId);
-                              return (
-                                <TableRow key={booking.id}>
-                                  <TableCell className="font-medium">{attraction.title}</TableCell>
-                                  <TableCell>{booking.date}</TableCell>
-                                  <TableCell>{booking.numTickets}</TableCell>
-                                  <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                      <Dialog open={editingId === booking.id} onOpenChange={(open) => {
-                                        if (!open) setEditingId(null);
-                                      }}>
-                                        <DialogTrigger asChild>
-                                          <Button variant="outline" size="icon" onClick={() => handleEditBooking(booking)}>
-                                            <Edit className="h-4 w-4" />
-                                          </Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                          <DialogHeader>
-                                            <DialogTitle>Edit Booking</DialogTitle>
-                                          </DialogHeader>
-                                          <div className="space-y-4 py-4">
-                                            <div className="space-y-2">
-                                              <Label htmlFor="edit-date">Date</Label>
-                                              <Input
-                                                id="edit-date"
-                                                type="date"
-                                                value={editBookingForm.date}
-                                                onChange={(e) => setEditBookingForm({ ...editBookingForm, date: e.target.value })}
-                                              />
-                                            </div>
-                                            <div className="space-y-2">
-                                              <Label htmlFor="edit-tickets">Number of Tickets</Label>
-                                              <Input
-                                                id="edit-tickets"
-                                                type="number"
-                                                min="1"
-                                                value={editBookingForm.numTickets}
-                                                onChange={(e) => setEditBookingForm({
-                                                  ...editBookingForm,
-                                                  numTickets: ensurePositiveNumber(Number(e.target.value))
-                                                })}
-                                              />
-                                            </div>
-                                            <Button
-                                              className="w-full mt-4"
-                                              onClick={handleSaveBookingEdit}
-                                            >
-                                              Save Changes
-                                            </Button>
-                                          </div>
-                                        </DialogContent>
-                                      </Dialog>
-                                      <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="text-red-500 hover:text-red-600"
-                                        onClick={() => handleDeleteBooking(booking.id)}
-                                      >
-                                        <Trash className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
+                      {bookings.length === 0 ? (
+                        <p className="text-gray-500">You have no bookings.</p>
                       ) : (
-                        <p className="text-gray-500">No bookings found.</p>
+                        <div className="overflow-x-auto">
+                          <table className="w-full table-auto border-collapse">
+                            <thead>
+                              <tr className="bg-gray-100">
+                                <th className="px-4 py-2 border">Destination</th>
+                                <th className="px-4 py-2 border">Date</th>
+                                <th className="px-4 py-2 border">Guests</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {bookings.map((booking) => (
+                                <tr key={booking.id} className="text-center">
+                                  <td className="border px-4 py-2">
+                                    {booking.destination}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {booking.date}
+                                  </td>
+                                  <td className="border px-4 py-2">
+                                    {booking.guests}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </CardContent>
                   </Card>
