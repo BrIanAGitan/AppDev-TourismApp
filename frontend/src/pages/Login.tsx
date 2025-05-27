@@ -35,26 +35,24 @@ const Login = () => {
     }
 
     try {
-      // Use the returned values directly
       const { access, refresh } = await loginUser({ email, password });
 
-      const userData = {
-        name: email.split("@")[0],
-        email: email,
-        avatarUrl: "",
-      };
-
-      localStorage.setItem("user", JSON.stringify(userData));
+      // Save tokens before navigating
       localStorage.setItem("access", access);
       localStorage.setItem("refresh", refresh);
 
+      // Optionally set a timer for auto-logout
+      setTimeout(() => {
+        localStorage.clear();
+        navigate("/login");
+      }, 30 * 60 * 1000); // 30 mins
+
       toast({
-        title: "Success!",
-        description: "You have successfully logged in.",
+        title: "Logged in!",
+        description: "Welcome back.",
       });
 
-      // Redirect to profile page
-      navigate(from);
+      navigate("/profile");
     } catch (error) {
       toast({
         title: "Login failed",

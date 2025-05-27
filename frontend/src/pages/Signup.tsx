@@ -3,7 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
 import api from "@/services/api";
@@ -34,7 +41,6 @@ const Signup = () => {
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
       toast({
         title: "Error",
         description: "Passwords do not match.",
@@ -45,18 +51,26 @@ const Signup = () => {
     }
 
     try {
-      await api.post("/api/register/", {
-        name,
-        email,
-        password,
-      });
+      await api.post(
+        "/api/register/",
+        {
+          username: name, // ✅ Must match the backend
+          email,
+          password,
+        },
+        {
+          headers: {
+            Authorization: "", // ✅ Prevent stale/expired token from interfering
+          },
+        }
+      );
 
       toast({
         title: "Account created!",
         description: "Your account has been created successfully.",
       });
 
-      navigate("/login"); // Redirect to login page
+      navigate("/login");
     } catch (error) {
       setError("Error creating account.");
       toast({

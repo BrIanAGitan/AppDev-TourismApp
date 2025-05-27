@@ -1,4 +1,3 @@
-// src/services/api.ts
 import axios from "axios";
 
 const API_BASE_URL =
@@ -9,13 +8,46 @@ const API_BASE_URL =
 const getToken = () =>
   localStorage.getItem("access") || localStorage.getItem("token");
 
+// 🔁 Axios instance without static token
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  headers: {
-    Authorization: getToken() ? `Bearer ${getToken()}` : undefined,
-  },
 });
+
+// 🔐 Dynamically attach token to each request
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+  return config;
+});
+
+// ❌ Remove bad token if server responds with token error
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      localStorage.getItem("refresh")
+    ) {
+      originalRequest._retry = true;
+      const newAccessToken = await refreshAccessToken();
+
+      if (newAccessToken) {
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        return api(originalRequest); // retry original request
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export type LoginResponse = {
   access: string;
@@ -35,6 +67,12 @@ export const loginUser = async ({
     email,
     password,
   });
+
+  const { access, refresh } = response.data;
+
+  localStorage.setItem("access", access);
+  localStorage.setItem("refresh", refresh);
+
   return response.data;
 };
 
@@ -43,46 +81,56 @@ export const registerUser = async (
   email: string,
   password: string
 ): Promise<void> => {
-  await api.post("/api/register/", {
-    name,
-    email,
-    password,
-  });
+  // ✅ Correct field: `username`
+  await axios.post(
+    `${API_BASE_URL}/register/`,
+    {
+      username: name,
+      email,
+      password,
+    },
+    {
+      withCredentials: true,
+      headers: {
+        Authorization: "", // ✅ Do not send token for registration
+      },
+    }
+  );
 };
 
 export const getBookings = async () => {
-  const token = getToken();
-  const response = await axios.get(`${API_BASE_URL}/bookings/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    withCredentials: true,
-  });
+  const response = await api.get("/bookings/");
   return response.data;
 };
 
 export const deleteBooking = async (id: number) => {
-  const token = getToken();
-  await axios.delete(`${API_BASE_URL}/bookings/${id}/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    withCredentials: true,
-  });
+  await api.delete(`/bookings/${id}/`);
 };
 
 export const updateBooking = async (
   id: number,
   data: { destination?: string; date?: string; guests?: number }
 ) => {
-  const token = getToken();
-  const response = await axios.put(`${API_BASE_URL}/bookings/${id}/`, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    withCredentials: true,
-  });
+  const response = await api.put(`/bookings/${id}/`, data);
   return response.data;
+};
+
+export const refreshAccessToken = async (): Promise<string | null> => {
+  const refresh = localStorage.getItem("refresh");
+  if (!refresh) return null;
+
+  try {
+    // Define the expected response type
+    type RefreshResponse = { access: string };
+    const response = await axios.post<RefreshResponse>(`${API_BASE_URL}/token/refresh/`, { refresh });
+    const { access } = response.data;
+    localStorage.setItem("access", access);
+    return access;
+  } catch (err) {
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    return null;
+  }
 };
 
 export default api;
