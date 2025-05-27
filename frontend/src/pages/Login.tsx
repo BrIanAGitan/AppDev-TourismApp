@@ -14,6 +14,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
 
+const isAuthenticated = () => {
+  const token = localStorage.getItem("access");
+  const user = localStorage.getItem("user");
+  return !!token && !!user;
+};
+
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,11 +29,11 @@ const Login = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const access = localStorage.getItem("access");
-    if (access) {
-      navigate("/profile");
+    // Only redirect if user is clearly logged in and on /login
+    if (isAuthenticated() && location.pathname === "/login") {
+      navigate("/profile", { replace: true });
     }
-  }, []);
+  }, [location, navigate]);
 
   const from = location.state?.from || "/profile";
   const redirectReason = location.state?.message || "";

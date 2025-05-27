@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
 // Pages
@@ -33,6 +33,14 @@ const PageRefresher = ({ children }: { children: React.ReactNode }) => {
   }, [location.pathname]);
 
   return <>{children}</>;
+};
+
+const RequireAuth = ({ children }: { children: JSX.Element }) => {
+  const token = localStorage.getItem("access");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
 };
 
 const App = () => (
@@ -97,9 +105,9 @@ const App = () => (
             path="/profile"
             element={
               <PageRefresher>
-                <PrivateRoute>
+                <RequireAuth>
                   <Profile />
-                </PrivateRoute>
+                </RequireAuth>
               </PageRefresher>
             }
           />
