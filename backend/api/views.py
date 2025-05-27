@@ -18,7 +18,12 @@ from .serializers import BookingSerializer
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        data['user'] = self.user.username
+        # Add more user info to the response if needed
+        data.update({
+            'user_id': self.user.id,
+            'email': self.user.email,
+            'username': self.user.username,
+        })
         return data
 
 class CustomTokenObtainPairView(TokenObtainPairView):
