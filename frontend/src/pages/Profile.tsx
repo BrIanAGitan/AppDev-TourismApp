@@ -51,7 +51,6 @@ type Booking = {
   destination: string;
   date: string;
   guests: number;
-  attractionId: string;
 }
 
 const Profile = () => {
@@ -208,9 +207,11 @@ const Profile = () => {
     }
   };
 
-  const getAttractionDetails = (id: string) => {
+  const getAttractionDetailsByDestination = (destination: string) => {
     return (
-      featuredAttractions.find((attraction) => attraction.id === id) || {
+      featuredAttractions.find((a) =>
+        a.title.toLowerCase() === destination.toLowerCase()
+      ) || {
         title: "Unknown Attraction",
         image: "https://placehold.co/600x400?text=Not+Found",
         location: "Unknown",
@@ -371,20 +372,18 @@ const Profile = () => {
                           <TableHeader>
                             <TableRow>
                               <TableHead>Attraction</TableHead>
-                              <TableHead>Date</TableHead>
                               <TableHead>Tickets</TableHead>
                               <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {bookings.map((booking) => {
-                              const attraction = getAttractionDetails(booking.attractionId);
+                              const attraction = getAttractionDetailsByDestination(booking.destination);
                               return (
                                 <TableRow key={booking.id}>
                                   <TableCell className="font-medium">
                                     {booking.destination || attraction.title}
                                   </TableCell>
-                                  <TableCell>{booking.date}</TableCell>
                                   <TableCell>{booking.guests}</TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">
