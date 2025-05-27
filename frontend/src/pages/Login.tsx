@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,14 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    if (token) {
+      navigate("/profile");
+    }
+  }, []);
 
   // Check if there's a redirect target in the state
   const from = location.state?.from || "/profile";
