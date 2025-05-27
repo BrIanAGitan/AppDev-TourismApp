@@ -8,8 +8,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .serializers import CustomTokenObtainPairSerializer
 from .serializers import UserSerializer
 from .models import Booking
 from .serializers import BookingSerializer
@@ -41,7 +41,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 class CustomLoginView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+    serializer_class = TokenObtainPairSerializer  # Or your custom serializer if needed
     permission_classes = [AllowAny]
 
 # Registration

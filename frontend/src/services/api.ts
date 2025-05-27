@@ -62,16 +62,27 @@ export const loginUser = async ({
   username,
   password,
 }: LoginPayload): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>("/token/", {
-    username,
-    password,
-  });
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/api/token/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    }
+  );
 
-  const { access, refresh } = response.data;
+  if (!response.ok) {
+    throw new Error("Login failed");
+  }
+
+  const data = await response.json();
+  const { access, refresh } = data;
   localStorage.setItem("access", access);
   localStorage.setItem("refresh", refresh);
 
-  return response.data;
+  return data;
 };
 
 export const registerUser = async (
