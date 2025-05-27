@@ -82,7 +82,7 @@ export const registerUser = async (
   password: string
 ): Promise<void> => {
   await api.post(
-    "/register/",
+    "/api/register/", // <-- FIXED PATH
     {
       username: name, // Django expects 'username'
       email,
