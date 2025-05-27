@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Calendar, Edit, Trash } from "lucide-react";
 import { featuredAttractions } from "@/components/FeaturedSection";
+import { authFetch } from "@/lib/authFetch";
 
 interface UserProfile {
   name: string;
@@ -69,18 +70,9 @@ const Profile = () => {
   const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cagayan-de-oro-tour.onrender.com/api";
 
   const fetchBookings = async () => {
-    const token = localStorage.getItem("access");
-    if (!token) return;
-
     try {
-      const response = await fetch(`${BASE_URL}/bookings/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      const response = await authFetch(`${BASE_URL}/bookings/`);
       if (!response.ok) throw new Error("Failed to fetch bookings");
-
       const data = await response.json();
       setBookings(data);
     } catch (error) {
@@ -129,13 +121,9 @@ const Profile = () => {
   const handleSaveBookingEdit = async () => {
     if (editingId === null) return;
     try {
-      const access = localStorage.getItem("access");
-      const response = await fetch(`https://cagayan-de-oro-tour.onrender.com/api/bookings/${editingId}/`, {
+      const response = await authFetch(`${BASE_URL}/bookings/${editingId}/`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${access}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editBookingForm),
       });
 
@@ -151,12 +139,8 @@ const Profile = () => {
 
   const handleDeleteBooking = async (id: number) => {
     try {
-      const access = localStorage.getItem("access");
-      const response = await fetch(`https://cagayan-de-oro-tour.onrender.com/api/bookings/${id}/`, {
+      const response = await authFetch(`${BASE_URL}/bookings/${id}/`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${access}`,
-        },
       });
 
       if (!response.ok) throw new Error("Failed to delete booking");
