@@ -200,7 +200,11 @@ const Profile = () => {
                 <CardContent className="pt-6 flex flex-col items-center">
                   <Avatar className="h-24 w-24 mb-4">
                     <AvatarImage src={profile.avatarUrl} />
-                    <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {typeof profile.name === "string" && profile.name
+                        ? profile.name.slice(0, 2).toUpperCase()
+                        : "NA"}
+                    </AvatarFallback>
                   </Avatar>
                   <h2 className="text-xl font-semibold">{profile.name}</h2>
                   <p className="text-muted-foreground">{profile.email}</p>
