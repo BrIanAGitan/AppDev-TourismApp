@@ -17,6 +17,7 @@ import { registerUser } from "@/services/api";
 
 const Signup = () => {
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,29 +31,30 @@ const Signup = () => {
     setIsLoading(true);
     setError(null);
 
-    if (!name || !email || !password || !confirmPassword) {
+    // Basic validation
+    if (!name || !username || !email || !password || !confirmPassword) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Please fill in all fields.",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
+      setIsLoading(false);
       toast({
         title: "Error",
         description: "Passwords do not match.",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
 
     try {
-      await registerUser(name, email, password);
-
+      // Call your backend registration API
+      await registerUser(username, email, password);
 
       toast({
         title: "Account created!",
@@ -102,6 +104,16 @@ const Signup = () => {
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="johndoe"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">

@@ -9,7 +9,7 @@ import { MapPin } from "lucide-react";
 import { loginUser } from "@/services/api";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -24,7 +24,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!email || !password) {
+    if (!username || !password) {
       toast({
         title: "Error",
         description: "Please fill in all fields.",
@@ -35,7 +35,7 @@ const Login = () => {
     }
 
     try {
-     const { access, refresh } = await loginUser({ email, password });
+      const { access, refresh } = await loginUser({ username, password });
 
       // Save tokens before navigating
       localStorage.setItem("access", access);
@@ -52,11 +52,11 @@ const Login = () => {
         description: "Welcome back.",
       });
 
-      navigate("/profile");
+      navigate(from);
     } catch (error) {
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: "Invalid username or password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -92,13 +92,13 @@ const Login = () => {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">

@@ -50,7 +50,7 @@ api.interceptors.response.use(
 );
 
 type LoginPayload = {
-  email: string;
+  username: string;
   password: string;
 };
 
@@ -60,16 +60,15 @@ export type LoginResponse = {
 };
 
 export const loginUser = async ({
-  email,
+  username,
   password,
 }: LoginPayload): Promise<LoginResponse> => {
   const response = await api.post<LoginResponse>("/token/", {
-    username: email,
+    username,
     password,
   });
 
   const { access, refresh } = response.data;
-
   localStorage.setItem("access", access);
   localStorage.setItem("refresh", refresh);
 
