@@ -52,15 +52,15 @@ const Signup = () => {
 
     try {
       await api.post(
-        "/api/register/",
+        "/register/",
         {
-          username: name, // ✅ Must match the backend
+          username: name, // 👈 This is required by Django
           email,
           password,
         },
         {
           headers: {
-            Authorization: "", // ✅ Prevent stale/expired token from interfering
+            Authorization: "",
           },
         }
       );
