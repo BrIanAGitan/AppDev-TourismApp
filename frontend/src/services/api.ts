@@ -8,13 +8,12 @@ const API_BASE_URL =
 const getToken = () =>
   localStorage.getItem("access") || localStorage.getItem("token");
 
-// 🔁 Axios instance without static token
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
-// 🔐 Dynamically attach token to each request
+// Attach token to requests
 api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
@@ -25,7 +24,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ❌ Remove bad token if server responds with token error
+// Refresh token on 401 error
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -41,7 +40,7 @@ api.interceptors.response.use(
 
       if (newAccessToken) {
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-        return api(originalRequest); // retry original request
+        return api(originalRequest); // Retry original request
       }
     }
 
@@ -81,15 +80,15 @@ export const registerUser = async (
   password: string
 ): Promise<void> => {
   await api.post(
-    "/api/register/", // <-- FIXED PATH
+    "/register/", // ✅ FIXED path
     {
-      username: name, // Django expects 'username'
+      username: name,
       email,
       password,
     },
     {
       headers: {
-        Authorization: "", // No token needed for registration
+        Authorization: "",
       },
       withCredentials: true,
     }
@@ -118,9 +117,11 @@ export const refreshAccessToken = async (): Promise<string | null> => {
   if (!refresh) return null;
 
   try {
-    // Define the expected response type
     type RefreshResponse = { access: string };
-    const response = await axios.post<RefreshResponse>(`${API_BASE_URL}/token/refresh/`, { refresh });
+    const response = await axios.post<RefreshResponse>(
+      `${API_BASE_URL}/token/refresh/`,
+      { refresh }
+    );
     const { access } = response.data;
     localStorage.setItem("access", access);
     return access;
