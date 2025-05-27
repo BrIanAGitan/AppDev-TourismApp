@@ -19,9 +19,8 @@ interface User {
   avatarUrl?: string;
 }
 
-const Navbar = () => {
+const Navbar = ({ user, setUser }: { user: User | null; setUser: (u: User | null) => void }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const navigate = useNavigate();
   const { toast } = useToast();

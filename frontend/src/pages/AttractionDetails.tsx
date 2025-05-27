@@ -13,9 +13,20 @@ import { useToast } from "@/hooks/use-toast";
 import { featuredAttractions } from "@/components/FeaturedSection";
 import { Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+// import Footer from "@/components/ui/Footer"; // Uncomment if you create this
 
-const AttractionDetails = () => {
+type User = {
+  name: string;
+  email: string;
+  avatarUrl?: string;
+};
+
+type AttractionDetailsProps = {
+  user: User;
+  setUser: (u: User) => void;
+};
+
+const AttractionDetails = ({ user, setUser }: AttractionDetailsProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -119,7 +130,7 @@ const AttractionDetails = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar user={user} setUser={setUser} />
 
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -198,7 +209,7 @@ const AttractionDetails = () => {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };

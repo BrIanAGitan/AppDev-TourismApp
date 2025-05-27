@@ -30,7 +30,12 @@ type Booking = {
   created_at?: string;
 };
 
-const Profile = () => {
+type ProfileProps = {
+  user: UserProfile;
+  setUser: (u: UserProfile) => void;
+};
+
+const Profile = ({ user, setUser }: ProfileProps) => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -183,7 +188,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar user={user} setUser={setUser} />
       <main className="flex-grow container mx-auto px-4 py-24">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">My Profile</h1>

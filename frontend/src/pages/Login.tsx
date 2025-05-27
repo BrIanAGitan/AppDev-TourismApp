@@ -20,7 +20,7 @@ const isAuthenticated = () => {
   return !!token && !!user;
 };
 
-const Login = () => {
+const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +66,11 @@ const Login = () => {
       const data = await response.json();
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
+
+      // Save user info (customize as needed)
+      const userInfo = { username };
+      localStorage.setItem("user", JSON.stringify(userInfo));
+      setUser(userInfo);
 
       navigate(from);
     } catch {
