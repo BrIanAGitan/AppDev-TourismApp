@@ -121,3 +121,14 @@ def get_bookings(request):
     except Exception as e:
         print("Error in get_bookings:", str(e))
         return Response({'error': 'Failed to fetch bookings'}, status=500)
+
+# In your UserSerializer (serializers.py)
+def create(self, validated_data):
+    user = User.objects.create_user(
+        username=validated_data["username"],
+        email=validated_data["email"],
+        password=validated_data["password"],
+    )
+    user.is_active = True  # Ensure user is active by default
+    user.save()
+    return user
