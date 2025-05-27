@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
-import api from "@/services/api";
+import { registerUser } from "@/services/api";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -51,19 +51,8 @@ const Signup = () => {
     }
 
     try {
-      await api.post(
-        "/register/",
-        {
-          username: name, // 👈 This is required by Django
-          email,
-          password,
-        },
-        {
-          headers: {
-            Authorization: "",
-          },
-        }
-      );
+      await registerUser(name, email, password);
+
 
       toast({
         title: "Account created!",
