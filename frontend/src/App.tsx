@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+
+// Pages
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -15,18 +17,18 @@ import AttractionDetails from "./pages/AttractionDetails";
 import About from "./pages/About";
 import ForgotPassword from "./pages/ForgotPassword";
 
+// Components
+import PrivateRoute from "./components/PrivateRoute";
+
 const queryClient = new QueryClient();
 
-// Component to handle page refresh on navigation
+// Refreshes data and scroll on route change
 const PageRefresher = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Reset scroll position when navigating to a new page
     window.scrollTo(0, 0);
-
-    // Force query client to refresh data on page change
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries(); // Refresh cached data
   }, [location.pathname]);
 
   return <>{children}</>;
@@ -72,30 +74,6 @@ const App = () => (
             }
           />
           <Route
-            path="/attractions-activities"
-            element={
-              <PageRefresher>
-                <AttractionsActivities />
-              </PageRefresher>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PageRefresher>
-                <Profile />
-              </PageRefresher>
-            }
-          />
-          <Route
-            path="/attraction/:id"
-            element={
-              <PageRefresher>
-                <AttractionDetails />
-              </PageRefresher>
-            }
-          />
-          <Route
             path="/about"
             element={
               <PageRefresher>
@@ -108,6 +86,37 @@ const App = () => (
             element={
               <PageRefresher>
                 <ForgotPassword />
+              </PageRefresher>
+            }
+          />
+
+          {/* ✅ Protected Routes */}
+          <Route
+            path="/profile"
+            element={
+              <PageRefresher>
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              </PageRefresher>
+            }
+          />
+          <Route
+            path="/attraction/:id"
+            element={
+              <PageRefresher>
+                <PrivateRoute>
+                  <AttractionDetails />
+                </PrivateRoute>
+              </PageRefresher>
+            }
+          />
+
+          <Route
+            path="/attractions-activities"
+            element={
+              <PageRefresher>
+                <AttractionsActivities />
               </PageRefresher>
             }
           />
