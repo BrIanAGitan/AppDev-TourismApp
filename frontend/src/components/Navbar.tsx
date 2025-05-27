@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, X, MapPin, UserRound, LogOut } from "lucide-react";
@@ -22,16 +22,18 @@ interface User {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
     const userDataStr = localStorage.getItem("user");
-    if (userDataStr) {
+    const token = localStorage.getItem("access");
+    if (userDataStr && token) {
       try {
         const userData = JSON.parse(userDataStr);
         setUser(userData);
+        setIsLoggedIn(true);
       } catch (error) {
         console.error("Failed to parse user data:", error);
       }
@@ -44,6 +46,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    setIsLoggedIn(false);
+    navigate("/login");
   };
 
   return (
