@@ -8,6 +8,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .serializers import UserSerializer
 from .models import Booking
@@ -17,8 +18,21 @@ from .serializers import BookingSerializer
 # JWT customization
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        data = super().validate(attrs)
-        # Add more user info to the response if needed
+        # Accept 'email' instead of 'username'
+        email = attrs.get("username") or attrs.get("email")
+        password = attrs.get("password")
+
+        if email and password:
+            try:
+                user_obj = User.objects.get(email=email)
+                attrs["username"] = user_obj.username  # Set username for parent validation
+            except User.DoesNotExist:
+                pass  # Let parent raise invalid credentials
+
+        return super().validate(attrs)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
         data.update({
             'user_id': self.user.id,
             'email': self.user.email,
