@@ -39,27 +39,31 @@ class BookingSerializer(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        email = attrs.get("username")  # still getting 'username' field from payload
+        login_input = attrs.get("username")  # frontend sends "username", but it's really an email
         password = attrs.get("password")
 
         try:
-            user = User.objects.get(email=email)
-            username = user.username
+            # Look up the user by email
+            user = User.objects.get(email=login_input)
         except User.DoesNotExist:
-            raise serializers.ValidationError("No user with this email")
+            raise serializers.ValidationError("Invalid email or password.")
 
-        user = authenticate(username=username, password=password)
+        # Authenticate using actual username and given password
+        user = authenticate(username=user.username, password=password)
 
         if not user:
-            raise serializers.ValidationError("Invalid credentials")
+            raise serializers.ValidationError("Invalid email or password.")
 
-        data = super().validate({"username": username, "password": password})
-        # Optionally add more user info to the response
-        data.update(
+        data = super().validate(
             {
-                "user_id": user.id,
-                "email": user.email,
                 "username": user.username,
+                "password": password,
             }
         )
+
+        data["user"] = {
+            "username": user.username,
+            "email": user.email,
+        }
+
         return data
