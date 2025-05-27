@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { UserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,14 +7,32 @@ import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { Calendar, Edit, Trash } from "lucide-react";
 import { featuredAttractions } from "@/components/FeaturedSection";
 import { authFetch } from "@/lib/authFetch";
-import { UserContext } from "@/context/UserContext";
 
 interface User {
   username: string;
@@ -64,7 +83,9 @@ const Profile = () => {
     setError(null);
 
     try {
-      const res = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/`);
+      const res = await authFetch(
+        `${import.meta.env.VITE_API_BASE_URL}/bookings/`
+      );
       if (!res.ok) {
         throw new Error("Failed to fetch bookings");
       }
@@ -106,14 +127,19 @@ const Profile = () => {
     fetchBookings();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSaveProfile = () => {
     setUser({ ...formData, username: user?.username || "" }); // Ensures context gets a valid User object
-    localStorage.setItem("user", JSON.stringify({ ...formData, username: user?.username || "" }));
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ ...formData, username: user?.username || "" })
+    );
     toast({
       title: "Profile Updated",
       description: "Your profile has been saved.",
@@ -145,11 +171,14 @@ const Profile = () => {
   const handleSaveBookingEdit = async () => {
     if (editingId === null) return;
     try {
-      const response = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/${editingId}/`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editBookingForm),
-      });
+      const response = await authFetch(
+        `${import.meta.env.VITE_API_BASE_URL}/bookings/${editingId}/`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editBookingForm),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to update booking");
 
@@ -163,9 +192,12 @@ const Profile = () => {
 
   const handleDeleteBooking = async (id: number) => {
     try {
-      const response = await authFetch(`${import.meta.env.VITE_API_BASE_URL}/bookings/${id}/`, {
-        method: "DELETE",
-      });
+      const response = await authFetch(
+        `${import.meta.env.VITE_API_BASE_URL}/bookings/${id}/`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to delete booking");
 
@@ -279,11 +311,19 @@ const Profile = () => {
                         />
                       </div>
                       <div className="flex gap-2 pt-2">
-                        <Button type="button" onClick={handleSaveProfile}>Save Changes</Button>
-                        <Button type="button" variant="outline" onClick={() => {
-                          setFormData(profile);
-                          setIsEditing(false);
-                        }}>Cancel</Button>
+                        <Button type="button" onClick={handleSaveProfile}>
+                          Save Changes
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setFormData(profile);
+                            setIsEditing(false);
+                          }}
+                        >
+                          Cancel
+                        </Button>
                       </div>
                     </form>
                   </CardContent>
