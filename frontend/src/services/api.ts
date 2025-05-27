@@ -63,7 +63,7 @@ export const loginUser = async ({
   email,
   password,
 }: LoginPayload): Promise<LoginResponse> => {
-  const response = await api.post<LoginResponse>("/login/", {
+  const response = await api.post<LoginResponse>("/token/", {
     username: email,
     password,
   });
