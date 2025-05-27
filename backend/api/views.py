@@ -1,5 +1,5 @@
-from rest_framework.permissions import AllowAny
-from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions, viewsets
 from django.contrib.auth.models import User
@@ -8,9 +8,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.decorators import api_view, permission_classes
 from .serializers import UserSerializer
-
 from .models import Booking
 from .serializers import BookingSerializer
 
@@ -27,6 +25,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 # Registration
 @api_view(['POST'])
+@permission_classes([AllowAny])  # ✅ ALLOWS public registration
 def register_user(request):
     required_fields = ['username', 'email', 'password']
     for field in required_fields:
@@ -84,3 +83,19 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+# Get bookings for authenticated user (API endpoint)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_bookings(request):
+    print("Request user:", request.user)
+    if not request.user.is_authenticated:
+        return Response({'error': 'User not authenticated'}, status=401)
+
+    try:
+        bookings = Booking.objects.filter(user=request.user)
+        serializer = BookingSerializer(bookings, many=True)
+        return Response(serializer.data)
+    except Exception as e:
+        print("Error in get_bookings:", str(e))
+        return Response({'error': 'Failed to fetch bookings'}, status=500)
