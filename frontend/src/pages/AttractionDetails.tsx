@@ -13,20 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { featuredAttractions } from "@/components/FeaturedSection";
 import { Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useUser } from "@/context/UserContext";
 // import Footer from "@/components/ui/Footer"; // Uncomment if you create this
 
-type User = {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-};
-
-type AttractionDetailsProps = {
-  user: User;
-  setUser: (u: User) => void;
-};
-
-const AttractionDetails = ({ user, setUser }: AttractionDetailsProps) => {
+const AttractionDetails = () => {
+  const { user } = useUser();
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -90,7 +81,7 @@ const AttractionDetails = ({ user, setUser }: AttractionDetailsProps) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            destination: attraction.title, // use title as destination
+            destination: attraction.title,
             date: selectedDate,
             guests: safeNumTickets,
           }),
@@ -130,8 +121,7 @@ const AttractionDetails = ({ user, setUser }: AttractionDetailsProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar user={user} setUser={setUser} />
-
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="relative h-[400px] lg:h-[500px] rounded-lg overflow-hidden">

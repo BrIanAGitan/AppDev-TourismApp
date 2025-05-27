@@ -11,41 +11,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { logout } from "@/lib/logout";
+import { useUser } from "@/context/UserContext";
 
-interface User {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-}
-
-const Navbar = ({ user, setUser }: { user: User | null; setUser: (u: User | null) => void }) => {
+const Navbar = () => {
+  const { user, setUser } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const userDataStr = localStorage.getItem("user");
-    const token = localStorage.getItem("access");
-    if (userDataStr && token) {
-      try {
-        const userData = JSON.parse(userDataStr);
-        setUser(userData);
-        setIsLoggedIn(true);
-      } catch (error) {
-        console.error("Failed to parse user data:", error);
-      }
-    }
-  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const handleLogout = () => {
-    logout();
-    setIsLoggedIn(false);
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+    setUser(null);
     navigate("/login");
   };
 
@@ -79,7 +61,7 @@ const Navbar = ({ user, setUser }: { user: User | null; setUser: (u: User | null
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar>
                     <AvatarImage src={user.avatarUrl} />
-                    <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -144,7 +126,7 @@ const Navbar = ({ user, setUser }: { user: User | null; setUser: (u: User | null
                   <div className="flex items-center space-x-3 py-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user.avatarUrl} />
-                      <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium">{user.name}</p>

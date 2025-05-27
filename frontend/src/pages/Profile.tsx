@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,11 +13,16 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Calendar, Edit, Trash } from "lucide-react";
 import { featuredAttractions } from "@/components/FeaturedSection";
 import { authFetch } from "@/lib/authFetch";
+import { useUser } from "@/context/UserContext";
 
-interface UserProfile {
-  name: string;
+interface User {
+  username: string;
   email: string;
+  name?: string;
   avatarUrl?: string;
+}
+
+interface UserProfile extends User {
   location?: string;
   bio?: string;
 }
@@ -30,20 +35,17 @@ type Booking = {
   created_at?: string;
 };
 
-type ProfileProps = {
-  user: UserProfile;
-  setUser: (u: UserProfile) => void;
-};
-
-const Profile = ({ user, setUser }: ProfileProps) => {
-  const { toast } = useToast();
+const Profile = () => {
+  const { user, setUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<UserProfile>({
-    name: "",
-    email: "",
-    location: "",
-    bio: "",
+    username: user?.username || "",
+    name: user?.name || "",
+    email: user?.email || "",
+    avatarUrl: user?.avatarUrl || "",
+    location: user?.location || "",
+    bio: user?.bio || "",
   });
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -57,7 +59,6 @@ const Profile = ({ user, setUser }: ProfileProps) => {
 
   const ensurePositiveNumber = (value: number) => Math.max(1, value);
 
-  // 🛠 Step 1: Memoized fetchBookings
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -101,7 +102,6 @@ const Profile = ({ user, setUser }: ProfileProps) => {
     }
   }, [navigate]);
 
-  // 🛠 Step 3: Initial Load with useEffect
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
@@ -112,18 +112,20 @@ const Profile = ({ user, setUser }: ProfileProps) => {
   };
 
   const handleSaveProfile = () => {
-    localStorage.setItem("user", JSON.stringify(formData));
-    setProfile(formData);
-    setIsEditing(false);
-
+    setUser({ ...formData, username: user?.username || "" }); // Ensures context gets a valid User object
+    localStorage.setItem("user", JSON.stringify({ ...formData, username: user?.username || "" }));
     toast({
       title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
+      description: "Your profile has been saved.",
     });
+    setIsEditing(false);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    setUser(null);
     navigate("/");
 
     toast({
@@ -188,7 +190,7 @@ const Profile = ({ user, setUser }: ProfileProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar user={user} setUser={setUser} />
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-24">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">My Profile</h1>

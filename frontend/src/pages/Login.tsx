@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
+import { useUser } from "@/context/UserContext";
 
 const isAuthenticated = () => {
   const token = localStorage.getItem("access");
@@ -20,16 +22,16 @@ const isAuthenticated = () => {
   return !!token && !!user;
 };
 
-const Login = ({ setUser }: { setUser: (user: any) => void }) => {
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { setUser } = useUser();
 
   useEffect(() => {
-    // Only redirect if user is clearly logged in and on /login
     if (isAuthenticated() && location.pathname === "/login") {
       navigate("/profile", { replace: true });
     }
@@ -67,12 +69,18 @@ const Login = ({ setUser }: { setUser: (user: any) => void }) => {
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
 
-      // Save user info (customize as needed)
-      const userInfo = { username };
+      // Decode token to extract user data (if your JWT includes it)
+      let userInfo = { username };
+      try {
+        const decoded: any = jwtDecode(data.access);
+        userInfo = { ...userInfo, ...decoded };
+      } catch {
+        // fallback to username only
+      }
       localStorage.setItem("user", JSON.stringify(userInfo));
-      setUser(userInfo);
+      setUser(userInfo); // ✅ Update context
 
-      navigate(from);
+      navigate("/profile");
     } catch {
       toast({
         title: "Login failed",
