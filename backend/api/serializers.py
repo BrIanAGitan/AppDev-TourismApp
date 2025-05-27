@@ -33,8 +33,8 @@ class NoteSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ["id", "user", "destination", "date", "guests", "created_at"]
-        read_only_fields = ["id", "user", "created_at"]
+        fields = "__all__"
+        depth = 1
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
