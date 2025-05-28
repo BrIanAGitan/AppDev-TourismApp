@@ -50,19 +50,20 @@ class CustomLoginView(TokenObtainPairView):
 def register_user(request):
     username = request.data.get("username")
     email = request.data.get("email")
-    password = request.data.get("password")
 
-    if not username or not email or not password:
-        return Response({"detail": "Username, email, and password are required."}, status=status.HTTP_400_BAD_REQUEST)
-
+    # Manual failsafe checks for duplicates
     if User.objects.filter(username=username).exists():
         return Response({"detail": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
-
     if User.objects.filter(email=email).exists():
         return Response({"detail": "Email already in use."}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = User.objects.create_user(username=username, email=email, password=password)
-    return Response({"detail": "User registered successfully."}, status=status.HTTP_201_CREATED)
+    # Use serializer for validation and creation
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"detail": "User registered successfully."}, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Login
 class LoginUserView(APIView):
