@@ -39,27 +39,15 @@ class BookingSerializer(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        login_input = attrs.get("username")  # frontend sends "username", but it's really an email
+        username = attrs.get("username")
         password = attrs.get("password")
 
-        try:
-            # Look up the user by email
-            user = User.objects.get(email=login_input)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid email or password.")
-
-        # Authenticate using actual username and given password
-        user = authenticate(username=user.username, password=password)
+        user = authenticate(username=username, password=password)
 
         if not user:
-            raise serializers.ValidationError("Invalid email or password.")
+            raise serializers.ValidationError("Invalid username or password.")
 
-        data = super().validate(
-            {
-                "username": user.username,
-                "password": password,
-            }
-        )
+        data = super().validate(attrs)
 
         data["user"] = {
             "username": user.username,
