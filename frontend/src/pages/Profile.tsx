@@ -241,7 +241,9 @@ const Profile = () => {
                         : "NA"}
                     </AvatarFallback>
                   </Avatar>
-                  <h2 className="text-xl font-semibold">{profile.name}</h2>
+                  <h2 className="text-xl font-bold">
+                    {(profile.first_name || profile.username) + (profile.last_name ? ` ${profile.last_name}` : "")}
+                  </h2>
                   <p className="text-muted-foreground">{profile.email}</p>
                   {profile.location && (
                     <p className="text-sm mt-2">{profile.location}</p>
