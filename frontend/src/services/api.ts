@@ -89,20 +89,17 @@ export const registerUser = async (
   firstName: string,
   lastName: string
 ) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_BASE_URL}/register/`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username,
-        email,
-        password,
-        first_name: firstName,
-        last_name: lastName,
-      }),
-    }
-  );
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/register/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+    }),
+  });
 
   if (!response.ok) {
     throw new Error("Failed to register user");

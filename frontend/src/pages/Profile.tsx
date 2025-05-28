@@ -236,8 +236,8 @@ const Profile = () => {
                   <Avatar className="h-24 w-24 mb-4">
                     <AvatarImage src={profile.avatarUrl} />
                     <AvatarFallback>
-                      {typeof profile.name === "string" && profile.name
-                        ? profile.name.slice(0, 2).toUpperCase()
+                      {profile.first_name && profile.last_name
+                        ? `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase()
                         : "NA"}
                     </AvatarFallback>
                   </Avatar>
