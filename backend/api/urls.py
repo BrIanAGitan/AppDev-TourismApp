@@ -7,6 +7,7 @@ from .views import (
     CustomLoginView,
     BookingViewSet,
     BookingListCreateView,  # <-- Import your view
+    get_user_profile,       # <-- Add this import
 )
 
 router = DefaultRouter()
@@ -18,5 +19,6 @@ urlpatterns = [
     path('token/', CustomLoginView.as_view(), name='token_obtain_pair'),
     path('api/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('bookings/', BookingListCreateView.as_view(), name='booking-list-create'),  # <-- Add this line
+    path('profile/', get_user_profile, name='user-profile'),  # <-- Add this line
     path('', include(router.urls)),
 ]

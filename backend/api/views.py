@@ -125,3 +125,9 @@ def get_bookings(request):
         return Response(serializer.data)
     except Exception as e:
         print("Error in get_bookings:", str(e))
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
