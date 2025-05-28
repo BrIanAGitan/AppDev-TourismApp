@@ -349,7 +349,7 @@ const Profile = () => {
                         <div>
                           <p className="text-lg font-medium">Full Name</p>
                           <p>
-                            {(profile.first_name || profile.last_name)
+                            {(profile.first_name && profile.last_name)
                               ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
                               : profile.username}
                           </p>
@@ -419,6 +419,7 @@ const Profile = () => {
                                               <Input
                                                 id="edit-date"
                                                 type="date"
+                                                min={new Date().toISOString().split("T")[0]} // this sets today as the minimum
                                                 value={editBookingForm.date}
                                                 onChange={(e) => setEditBookingForm({ ...editBookingForm, date: e.target.value })}
                                               />

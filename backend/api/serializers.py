@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Note, Booking
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
-
+from datetime import date
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
@@ -37,6 +37,11 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = "__all__"
         depth = 1
+
+        def validate_date(self, value):
+            if value < date.today():
+                raise serializers.ValidationError("Booking date cannot be in the past.")
+            return value
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

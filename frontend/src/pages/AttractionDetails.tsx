@@ -169,6 +169,7 @@ const AttractionDetails = () => {
                       <label className="block text-sm font-medium mb-1">Date</label>
                       <Input
                         type="date"
+                        min={new Date().toISOString().split("T")[0]}
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
                         required
