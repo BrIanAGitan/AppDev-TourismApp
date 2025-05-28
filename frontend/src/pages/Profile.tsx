@@ -221,6 +221,12 @@ const Profile = () => {
     );
   };
 
+  // Compute full name with fallback to username
+  const fullName =
+    user?.first_name || user?.last_name
+      ? `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim()
+      : user?.username;
+
   if (!profile) return null;
 
   return (
@@ -241,10 +247,8 @@ const Profile = () => {
                         : "NA"}
                     </AvatarFallback>
                   </Avatar>
-                  <h2 className="text-xl font-bold">
-                    {(profile.first_name || profile.username) + (profile.last_name ? ` ${profile.last_name}` : "")}
-                  </h2>
-                  <p className="text-muted-foreground">{profile.email}</p>
+                  <h2 className="text-xl font-bold">{fullName}</h2>
+                  <p className="text-muted-foreground">{user?.email}</p>
                   {profile.location && (
                     <p className="text-sm mt-2">{profile.location}</p>
                   )}
