@@ -348,11 +348,15 @@ const Profile = () => {
                       <div className="space-y-4">
                         <div>
                           <p className="text-lg font-medium">Full Name</p>
-                          <p>{profile.first_name} {profile.last_name}</p>
+                          <p>
+                            {(profile.first_name || profile.last_name)
+                              ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim()
+                              : profile.username}
+                          </p>
                         </div>
                         <div>
                           <h3 className="font-medium text-sm">Email</h3>
-                          <p>{profile.email}</p>
+                          <p>{profile.email ?? "No email available"}</p>
                         </div>
                         {profile.location && (
                           <div>
