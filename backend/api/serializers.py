@@ -6,21 +6,20 @@ from django.contrib.auth import authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
-
     class Meta:
         model = User
-        fields = ["id", "username", "email", "password"]
+        fields = ["username", "email", "password"]
         extra_kwargs = {
             "password": {"write_only": True},
         }
 
     def create(self, validated_data):
-        return User.objects.create_user(
+        user = User.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
             password=validated_data["password"],
         )
+        return user
 
 
 class NoteSerializer(serializers.ModelSerializer):

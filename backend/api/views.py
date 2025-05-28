@@ -48,16 +48,20 @@ class CustomLoginView(TokenObtainPairView):
 @api_view(['POST'])
 @permission_classes([AllowAny])  # ✅ ALLOWS public registration
 def register_user(request):
+    username = request.data.get("username")
     email = request.data.get("email")
     password = request.data.get("password")
 
-    if not email or not password:
-        return Response({"detail": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+    if not username or not email or not password:
+        return Response({"detail": "Username, email, and password are required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if User.objects.filter(username=email).exists():
-        return Response({"detail": "User already exists."}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(username=username).exists():
+        return Response({"detail": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
 
-    user = User.objects.create_user(username=email, email=email, password=password)
+    if User.objects.filter(email=email).exists():
+        return Response({"detail": "Email already in use."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = User.objects.create_user(username=username, email=email, password=password)
     return Response({"detail": "User registered successfully."}, status=status.HTTP_201_CREATED)
 
 # Login
