@@ -42,6 +42,8 @@ interface User {
 }
 
 interface UserProfile extends User {
+  first_name?: string;
+  last_name?: string;
   location?: string;
   bio?: string;
 }
@@ -339,8 +341,8 @@ const Profile = () => {
                     <CardContent>
                       <div className="space-y-4">
                         <div>
-                          <h3 className="font-medium text-sm">Full Name</h3>
-                          <p>{profile.name}</p>
+                          <p className="text-lg font-medium">Full Name</p>
+                          <p>{profile.first_name} {profile.last_name}</p>
                         </div>
                         <div>
                           <h3 className="font-medium text-sm">Email</h3>

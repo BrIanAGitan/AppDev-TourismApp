@@ -6,20 +6,23 @@ from django.contrib.auth import authenticate
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+
     class Meta:
         model = User
-        fields = ["username", "email", "password"]
+        fields = ["id", "username", "email", "first_name", "last_name", "password"]
         extra_kwargs = {
             "password": {"write_only": True},
         }
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        return User.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
             password=validated_data["password"],
+            first_name=validated_data.get("first_name", ""),
+            last_name=validated_data.get("last_name", ""),
         )
-        return user
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -46,11 +49,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user:
             raise serializers.ValidationError("Invalid username or password.")
 
+        self.user = user  # Store user for to_representation
         data = super().validate(attrs)
+        return data
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
         data["user"] = {
-            "username": user.username,
-            "email": user.email,
+            "id": self.user.id,
+            "username": self.user.username,
+            "email": self.user.email,
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
         }
-
         return data

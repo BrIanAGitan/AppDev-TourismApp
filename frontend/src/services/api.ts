@@ -83,24 +83,32 @@ export const loginUser = async ({
 };
 
 export const registerUser = async (
-  name: string,
+  username: string,
   email: string,
-  password: string
-): Promise<void> => {
-  await api.post(
-    "/register/", // ✅ FIXED path
+  password: string,
+  firstName: string,
+  lastName: string
+) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/register/`,
     {
-      username: name,
-      email,
-      password,
-    },
-    {
-      headers: {
-        Authorization: "",
-      },
-      withCredentials: true,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+      }),
     }
   );
+
+  if (!response.ok) {
+    throw new Error("Failed to register user");
+  }
+
+  return response.json();
 };
 
 export const getBookings = async () => {
